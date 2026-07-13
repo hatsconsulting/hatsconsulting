@@ -192,17 +192,21 @@ src="https://www.facebook.com/tr?id=1188820516751079&ev=PageView&noscript=1"
 
   let leadFired = false;
   function fireLeadOnce() {
-    if (!leadFired) {
-      leadFired = true;
-      fbq('track', 'Lead');
-    }
+    if (leadFired) return;
+    leadFired = true;
+
+    // unique eventID -> agar future me server-side (CAPI) bhi add hua to
+    // Meta khud dono ko same event maan kar dedupe kar dega
+    const eventId = 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    fbq('track', 'Lead', {}, { eventID: eventId });
   }
 
   const btn = document.getElementById("ctaBtn");
   btn.href = telegramLink;
-  btn.addEventListener("click", function() {
-    fireLeadOnce();
-  });
+
+  // { once:true } -> yeh click listener sirf ek hi baar trigger hoga,
+  // isse agar script kabhi galti se dobara load ho to bhi double-fire nahi hoga
+  btn.addEventListener("click", fireLeadOnce, { once: true });
 </script>
 
 </body>
